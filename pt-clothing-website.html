@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>p.t clothing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* Layout: sticky nav, short hero, guided filters (occasion + type + who), product grid, store card */
+  :root {
+    --bg: #F2F6F6;
+    --card: #FFFFFF;
+    --tile: #E6EEEE;
+    --fg: #14262B;
+    --muted: #51666B;
+    --line: #D3DEDF;
+    --accent: #0E5C63;
+    --accent-fg: #FFFFFF;
+    --sun: #F2B632;
+    --sun-fg: #14262B;
+    --garment-stroke: rgba(20, 38, 43, 0.28);
+    --font-display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+    --font-body: "DM Sans", "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0F1B1E; --card: #172629; --tile: #213438; --fg: #E8F0F0; --muted: #9DB3B6;
+      --line: #2C4247; --accent: #5CC6C9; --accent-fg: #0F1B1E; --sun: #F2B632; --sun-fg: #14262B;
+      --garment-stroke: rgba(232, 240, 240, 0.35); color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0F1B1E; --card: #172629; --tile: #213438; --fg: #E8F0F0; --muted: #9DB3B6;
+    --line: #2C4247; --accent: #5CC6C9; --accent-fg: #0F1B1E; --sun: #F2B632; --sun-fg: #14262B;
+    --garment-stroke: rgba(232, 240, 240, 0.35); color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg); color: var(--fg);
+    font-family: var(--font-body); font-size: 16px; line-height: 1.5;
+    padding-inline: 16px; padding-block: 0 48px;
+  }
+  .wrap { max-width: 1100px; margin-inline: auto; }
+  h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.1; margin: 0; }
+  a { color: inherit; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  /* nav */
+  .nav {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+    background: var(--bg); border-bottom: 1px solid var(--line);
+    margin-inline: -16px; padding: 12px 16px;
+  }
+  .nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .brand { font-family: var(--font-display); font-weight: 700; font-size: 1.4rem; text-decoration: none; letter-spacing: -0.02em; }
+  .brand span { color: var(--accent); }
+  .nav-links { display: flex; gap: 8px; }
+  .nav-links a {
+    text-decoration: none; font-weight: 500; padding: 8px 14px; border-radius: 999px;
+  }
+  .nav-links a:hover { background: var(--tile); }
+
+  /* hero */
+  .hero { padding-block: 40px 24px; display: grid; gap: 16px; }
+  .hero h1 { font-size: clamp(2.1rem, 7vw, 3.8rem); max-width: 14ch; }
+  .hero p { margin: 0; font-size: 1.1rem; color: var(--muted); max-width: 46ch; }
+  .tag {
+    display: inline-block; width: fit-content; background: var(--sun); color: var(--sun-fg);
+    font-weight: 700; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 6px 12px; border-radius: 999px;
+  }
+
+  /* guide */
+  .guide { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; display: grid; gap: 18px; }
+  .guide h2 { font-size: 1.3rem; }
+  .group { display: grid; gap: 8px; }
+  .group-label { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font: inherit; font-weight: 500; cursor: pointer;
+    background: var(--bg); color: var(--fg);
+    border: 1px solid var(--line); border-radius: 999px; padding: 9px 16px; min-height: 40px;
+  }
+  .chip:hover { border-color: var(--accent); }
+  .chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  .tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+  .count { font-weight: 500; color: var(--muted); }
+  .sort { display: flex; align-items: center; gap: 8px; }
+  .sort select {
+    font: inherit; color: var(--fg); background: var(--bg);
+    border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-height: 40px;
+  }
+  .reset { font: inherit; color: var(--accent); background: none; border: 0; cursor: pointer; text-decoration: underline; padding: 8px; }
+
+  /* grid */
+  .shop { padding-block: 28px; scroll-margin-top: 70px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; margin-top: 16px; }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+  .art { background: var(--tile); aspect-ratio: 1 / 1; display: grid; place-items: center; }
+  .art svg { width: 82%; height: 82%; }
+  .info { padding: 12px 14px 14px; display: grid; gap: 4px; }
+  .info h3 { font-size: 1rem; font-weight: 600; }
+  .meta { font-size: 0.85rem; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid var(--garment-stroke); flex: none; }
+  .price { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .empty { padding: 40px 0; text-align: center; color: var(--muted); }
+
+  /* store */
+  .store { scroll-margin-top: 70px; background: var(--accent); color: var(--accent-fg); border-radius: 20px; padding: 28px 22px; display: grid; gap: 14px; }
+  .store h2 { font-size: clamp(1.6rem, 5vw, 2.4rem); }
+  .store p { margin: 0; max-width: 52ch; }
+  .store .where { font-weight: 700; font-size: 1.1rem; }
+  .store a.btn {
+    width: fit-content; background: var(--sun); color: var(--sun-fg); font-weight: 700;
+    text-decoration: none; padding: 12px 20px; border-radius: 999px;
+  }
+  footer { padding-block: 28px 0; color: var(--muted); font-size: 0.9rem; }
+  @media (prefers-reduced-motion: no-preference) { .item { transition: transform .15s ease; } .item:hover { transform: translateY(-3px); } }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top">p<span>.</span>t clothing</a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="#shop">Shop</a>
+      <a href="#store">Visit us</a>
+    </nav>
+  </div>
+</header>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="shade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#000" stop-opacity=".26"/>
+      <stop offset=".3" stop-color="#000" stop-opacity=".02"/>
+      <stop offset=".55" stop-color="#fff" stop-opacity=".12"/>
+      <stop offset=".8" stop-color="#000" stop-opacity=".04"/>
+      <stop offset="1" stop-color="#000" stop-opacity=".28"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<main class="wrap" id="top">
+  <section class="hero">
+    <span class="tag">Sunshine Plaza</span>
+    <h1>Clothes for every day on the coast.</h1>
+    <p>Tees, hoodies, jeans, dresses, caps and shoes. Pick what you are shopping for below and we will narrow it down.</p>
+  </section>
+
+  <section class="guide" aria-label="Find your pieces">
+    <h2>Find your pieces</h2>
+    <div class="group">
+      <div class="group-label">1. What are you shopping for?</div>
+      <div class="chips" id="occasion"></div>
+    </div>
+    <div class="group">
+      <div class="group-label">2. What type of clothing?</div>
+      <div class="chips" id="type"></div>
+    </div>
+    <div class="group">
+      <div class="group-label">3. Who is it for?</div>
+      <div class="chips" id="who"></div>
+    </div>
+  </section>
+
+  <section class="shop" id="shop">
+    <div class="tools">
+      <div class="count" id="count" aria-live="polite"></div>
+      <div class="sort">
+        <button class="reset" id="reset" type="button">Clear filters</button>
+        <label for="sort">Sort</label>
+        <select id="sort">
+          <option value="featured">Featured</option>
+          <option value="low">Price: low to high</option>
+          <option value="high">Price: high to low</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="empty" id="empty" hidden>Nothing matches those filters. Try clearing one of them.</div>
+  </section>
+
+  <section class="store" id="store">
+    <h2>Try it on at Sunshine Plaza</h2>
+    <p>Every piece on this page is in the store. Come in, find your size and try things on.</p>
+    <div class="where">p.t clothing, Sunshine Plaza, Maroochydore QLD</div>
+    <a class="btn" href="https://www.google.com/maps/search/?api=1&query=Sunshine+Plaza+Maroochydore">Get directions</a>
+  </section>
+
+  <footer>© p.t clothing. Sample range and prices shown for the website preview.</footer>
+</main>
+
+<script>
+  var ST = "var(--garment-stroke)";
+  function B(d, c) { return '<path d="' + d + '" fill="' + c + '" stroke="' + ST + '" stroke-width="1.2" stroke-linejoin="round"/><path d="' + d + '" fill="url(#shade)"/>'; }
+  function L(d, w, o) { return '<path d="' + d + '" fill="none" stroke="rgba(0,0,0,' + o + ')" stroke-width="' + w + '" stroke-linecap="round" stroke-linejoin="round"/>'; }
+  function H(d, w, o) { return '<path d="' + d + '" fill="none" stroke="rgba(255,255,255,' + o + ')" stroke-width="' + w + '" stroke-linecap="round"/>'; }
+  function F(d, f) { return '<path d="' + d + '" fill="' + f + '"/>'; }
+  var BODY = "M34 17 L9 43 L13 80 Q19 83 26 81 L28 54 L28 87 Q50 91 72 87 L72 54 L74 81 Q81 83 87 80 L91 43 L66 17 Q50 26 34 17 Z";
+  var ART = {
+    Tees: function (c) {
+      return B("M32 15 L10 28 L19 44 L28 39 L28 87 Q50 91 72 87 L72 39 L81 44 L90 28 L68 15 Q50 31 32 15 Z", c) +
+        L("M33 15.5 Q50 33 67 15.5", 2.4, .3) + H("M36 15.5 Q50 29 64 15.5", .8, .25) +
+        L("M32 15 L28 39", .8, .2) + L("M68 15 L72 39", .8, .2) + L("M28 83 Q50 87 72 83", 1, .2) +
+        L("M11 29 L20 42", .8, .15) + L("M89 29 L80 42", .8, .15) +
+        L("M40 52 Q44 64 40 78", 1.4, .07) + L("M61 48 Q58 62 63 76", 1.4, .07);
+    },
+    Hoodies: function (c) {
+      return B(BODY, c) + B("M33 17 Q50 1 67 17 Q59 34 50 36 Q41 34 33 17 Z", c) +
+        F("M40 17 Q50 7 60 17 Q55 29 50 31 Q45 29 40 17 Z", "rgba(0,0,0,.38)") +
+        H("M46 31 L45 47", 1.3, .75) + H("M54 31 L55 47", 1.3, .75) +
+        L("M32 66 L68 66 L71 80 L29 80 Z", 1, .22) +
+        L("M13.5 77 L26 75", 2.4, .22) + L("M74 75 L86.5 77", 2.4, .22) + L("M28 83 Q50 87 72 83", 2.6, .22);
+    },
+    Jackets: function (c) {
+      return B(BODY, c) + B("M35 17 Q50 8 65 17 L63 25 L50 21 L37 25 Z", c) +
+        L("M50 21 L50 87", 1.6, .35) + H("M50 21 L50 87", .6, .55) +
+        L("M30 42 Q50 48 70 42", .8, .15) +
+        L("M31 66 L41 69", 2, .3) + L("M69 66 L59 69", 2, .3) +
+        L("M13.5 77 L26 75", 2.4, .22) + L("M74 75 L86.5 77", 2.4, .22) + L("M28 83 Q50 87 72 83", 2.6, .22);
+    },
+    Pants: function (c) {
+      return B("M30 10 L70 10 L75 92 L55 92 L50 42 L45 92 L25 92 Z", c) +
+        F("M30 10 L70 10 L70.4 17 L29.6 17 Z", "rgba(0,0,0,.14)") +
+        '<circle cx="50" cy="13.5" r="1.3" fill="rgba(255,255,255,.7)"/>' +
+        L("M50 17 L50 42", 1, .28) + L("M31 19 Q40 24 40 36", 1, .25) + L("M69 19 Q60 24 60 36", 1, .25) +
+        L("M25.5 87 L45.5 87", 1.2, .2) + L("M54.5 87 L74.5 87", 1.2, .2) +
+        L("M33 20 L28 90", .8, .1) + L("M67 20 L72 90", .8, .1);
+    },
+    Shorts: function (c) {
+      return B("M26 14 L74 14 L81 64 L57 64 L50 40 L43 64 L19 64 Z", c) +
+        F("M26 14 L74 14 L74.5 21 L25.5 21 Z", "rgba(0,0,0,.14)") +
+        H("M47 21 L45 31", 1, .6) + H("M53 21 L55 31", 1, .6) +
+        L("M50 21 L50 40", 1, .25) + L("M27 23 Q36 28 37 42", 1, .22) + L("M73 23 Q64 28 63 42", 1, .22) +
+        L("M19.5 60 L43.5 60", 1.2, .2) + L("M56.5 60 L80.5 60", 1.2, .2);
+    },
+    Dresses: function (c) {
+      return B("M40 8 L60 8 L62 30 Q65 38 77 90 Q50 95 23 90 Q35 38 38 30 Z", c) +
+        L("M40 8.5 Q50 22 60 8.5", 1.6, .3) + L("M38.5 32 Q50 37 61.5 32", 1, .22) +
+        L("M33 56 Q38 74 31 90", 1.4, .08) + H("M50 40 Q51 66 50 92", 1.4, .14) +
+        L("M24 87 Q50 92 76 87", 1, .2);
+    },
+    Caps: function (c, name) {
+      var s = "";
+      if (name === "Beanie") {
+        s = B("M22 72 Q16 28 50 24 Q84 28 78 72 Z", c) + B("M20 61 L80 61 L81 75 L19 75 Z", c);
+        for (var x = 24; x <= 76; x += 6) s += L("M" + x + " 62 L" + x + " 74", .8, .16);
+        for (var y = 30; y <= 50; y += 10) s += L("M" + (26 + (y - 30) / 4) + " " + y + " Q50 " + (y - 3) + " " + (74 - (y - 30) / 4) + " " + y, .6, .1);
+        return s;
+      }
+      if (name === "Bucket Hat") {
+        return B("M30 62 Q28 32 50 30 Q72 32 70 62 Z", c) +
+          B("M12 62 Q50 54 88 62 Q94 70 86 74 Q50 82 14 74 Q6 70 12 62 Z", c) +
+          L("M30.5 58 Q50 62 69.5 58", 3, .25) + L("M16 72 Q50 78 84 72", .7, .18) + L("M50 31 L50 58", .7, .12);
+      }
+      return B("M18 64 Q16 28 50 26 Q82 28 82 64 Z", c) + B("M60 62 Q88 60 97 70 Q80 76 58 68 Z", c) +
+        L("M50 26 L50 64", .8, .2) + L("M34 29 Q30 46 31 64", .8, .18) + L("M66 29 Q70 46 69 64", .8, .18) +
+        '<circle cx="50" cy="26.5" r="2.2" fill="' + c + '" stroke="' + ST + '" stroke-width=".8"/>' +
+        L("M18 62 L82 62", 1.4, .2) + L("M43 38 L45 38", 1.2, .3) + L("M55 38 L57 38", 1.2, .3);
+    },
+    Shoes: function (c, name) {
+      if (name === "Pool Slides" || name === "Leather Sandals") {
+        var s = B("M10 70 Q50 60 90 70 L90 78 Q50 86 10 78 Z", c) +
+          F("M14 72 Q50 64 86 72 L86 74 Q50 80 14 74 Z", "rgba(255,255,255,.18)") +
+          B("M24 69 Q30 44 52 42 Q72 44 78 68 L68 70 Q62 54 52 53 Q42 54 34 70 Z", c);
+        if (name === "Leather Sandals") s += B("M14 70 Q12 56 20 52 L28 54 Q22 60 24 70 Z", c) + L("M30 50 Q52 44 74 54", .8, .25);
+        return s;
+      }
+      var chunky = name === "Chunky Trainers";
+      var top = chunky ? 66 : 72;
+      var sole = chunky ? "M8 68 L92 68 L94 82 Q50 89 6 82 Z" : "M8 72 L92 72 L93 81 Q50 86 7 81 Z";
+      return B(sole, "#F4F2EC") +
+        B("M10 " + top + " L12 " + (top - 26) + " Q28 " + (top - 28) + " 38 " + (top - 23) + " L50 " + (top - 34) + " Q62 " + (top - 22) + " 74 " + (top - 17) + " Q91 " + (top - 13) + " 92 " + top + " Z", c) +
+        F("M72 " + (top - 16) + " Q90 " + (top - 13) + " 92 " + top + " L70 " + top + " Z", "rgba(255,255,255,.2)") +
+        H("M44 " + (top - 27) + " L53 " + (top - 21), 1.2, .8) + H("M50 " + (top - 31) + " L59 " + (top - 23), 1.2, .8) + H("M56 " + (top - 26) + " L65 " + (top - 19), 1.2, .8) +
+        L("M38 " + (top - 23) + " L50 " + (top - 34), 1, .3) + L("M10 " + (top - 12) + " L18 " + (top - 12), 1.4, .25) +
+        L("M9 " + (top + 1) + " L92 " + (top + 1), .8, .2) + (chunky ? L("M8 76 L93 76", .8, .15) : "");
+    }
+  };
+  function art(p) { return ART[p[1]](p[5], p[0]); }
+  // name, type, who, price, colour name, hex, occasions
+  var P = [
+    ["Everyday Tee","Tees","Unisex",35,"White","#F7F7F4",["everyday","beach"]],
+    ["Boxy Logo Tee","Tees","Unisex",42,"Black","#1C1F20",["everyday","night"]],
+    ["Ribbed Baby Tee","Tees","Women",32,"Sage","#9DB59A",["everyday","night"]],
+    ["Linen Camp Shirt","Tees","Men",69,"Sand","#D9C7A3",["beach","work"]],
+    ["Surf Tee","Tees","Men",38,"Sky","#7FB7D9",["beach"]],
+    ["Classic Hoodie","Hoodies","Unisex",79,"Grey marle","#A5ABAE",["cool","everyday"]],
+    ["Zip Hoodie","Hoodies","Unisex",89,"Forest","#2F5B45",["cool"]],
+    ["Oat Crew Sweat","Hoodies","Women",75,"Oat","#D8CDB8",["cool","everyday"]],
+    ["Cropped Hoodie","Hoodies","Women",72,"Lilac","#B9A5D6",["cool","night"]],
+    ["Coach Jacket","Jackets","Unisex",99,"Black","#1C1F20",["cool","night"]],
+    ["Denim Jacket","Jackets","Unisex",119,"Indigo","#34507A",["everyday","night"]],
+    ["Light Windbreaker","Jackets","Unisex",95,"Teal","#2A8C91",["beach","cool"]],
+    ["Bomber Jacket","Jackets","Men",129,"Olive","#6B7048",["cool","night"]],
+    ["Straight Jeans","Pants","Unisex",99,"Indigo","#34507A",["everyday","night"]],
+    ["Cargo Pants","Pants","Men",89,"Khaki","#A39A74",["everyday"]],
+    ["Wide Leg Trousers","Pants","Women",85,"Black","#1C1F20",["work","night"]],
+    ["Linen Pants","Pants","Women",79,"Natural","#E3D8C2",["beach","work"]],
+    ["Track Pants","Pants","Unisex",65,"Charcoal","#3F4649",["everyday","cool"]],
+    ["Board Shorts","Shorts","Men",55,"Navy","#1F3A63",["beach"]],
+    ["Denim Shorts","Shorts","Women",59,"Light blue","#8FB2D6",["everyday","beach"]],
+    ["Bike Shorts","Shorts","Women",35,"Black","#1C1F20",["everyday"]],
+    ["Chino Shorts","Shorts","Men",62,"Stone","#C9BEA5",["work","everyday"]],
+    ["Satin Slip Dress","Dresses","Women",99,"Rose","#D9899A",["night"]],
+    ["Summer Sundress","Dresses","Women",79,"Yellow","#F0CB57",["beach","everyday"]],
+    ["Shirt Dress","Dresses","Women",89,"White","#F7F7F4",["work","everyday"]],
+    ["Knit Mini Dress","Dresses","Women",85,"Black","#1C1F20",["night"]],
+    ["Dad Cap","Caps","Unisex",29,"Navy","#1F3A63",["beach","everyday"]],
+    ["Bucket Hat","Caps","Unisex",32,"Sand","#D9C7A3",["beach"]],
+    ["Beanie","Caps","Unisex",25,"Charcoal","#3F4649",["cool"]],
+    ["Canvas Sneakers","Shoes","Unisex",79,"White","#F7F7F4",["everyday"]],
+    ["Pool Slides","Shoes","Unisex",35,"Black","#1C1F20",["beach"]],
+    ["Chunky Trainers","Shoes","Unisex",139,"Grey","#A5ABAE",["everyday","night"]],
+    ["Leather Sandals","Shoes","Women",89,"Tan","#B98A5B",["beach","work"]]
+  ];
+  var OCC = [["all","Anything"],["everyday","Everyday"],["beach","Beach days"],["night","Night out"],["work","Work"],["cool","Cooler nights"]];
+  var TYPES = ["All","Tees","Hoodies","Jackets","Pants","Shorts","Dresses","Caps","Shoes"];
+  var WHO = ["All","Women","Men","Unisex"];
+  var state = { occ: "all", type: "All", who: "All", sort: "featured" };
+
+  function chips(id, list, key) {
+    var el = document.getElementById(id);
+    list.forEach(function (o) {
+      var val = Array.isArray(o) ? o[0] : o, label = Array.isArray(o) ? o[1] : o;
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "chip"; b.textContent = label; b.dataset.val = val;
+      b.addEventListener("click", function () { state[key] = val; render(); });
+      el.appendChild(b);
+    });
+  }
+  function sync(id, key) {
+    document.querySelectorAll("#" + id + " .chip").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.dataset.val === state[key]));
+    });
+  }
+  function card(p) {
+    return '<article class="item"><div class="art"><svg viewBox="0 0 100 100" role="img" aria-label="' + p[0] + ', ' + p[4] + '">' +
+      art(p) + '<ellipse cx="50" cy="95" rx="30" ry="2.4" fill="rgba(0,0,0,.12)"/></svg></div>' +
+      '<div class="info"><h3>' + p[0] + '</h3><div class="meta"><span class="dot" style="background:' + p[5] + '"></span>' + p[4] + ' · ' + p[2] + '</div>' +
+      '<div class="price">$' + p[3] + '</div></div></article>';
+  }
+  function render() {
+    var list = P.filter(function (p) {
+      return (state.occ === "all" || p[6].indexOf(state.occ) > -1) &&
+             (state.type === "All" || p[1] === state.type) &&
+             (state.who === "All" || p[2] === state.who || p[2] === "Unisex");
+    });
+    if (state.sort === "low") list.sort(function (a, b) { return a[3] - b[3]; });
+    if (state.sort === "high") list.sort(function (a, b) { return b[3] - a[3]; });
+    document.getElementById("grid").innerHTML = list.map(card).join("");
+    document.getElementById("count").textContent = list.length + (list.length === 1 ? " piece" : " pieces");
+    document.getElementById("empty").hidden = list.length > 0;
+    sync("occasion", "occ"); sync("type", "type"); sync("who", "who");
+  }
+  chips("occasion", OCC, "occ"); chips("type", TYPES, "type"); chips("who", WHO, "who");
+  document.getElementById("sort").addEventListener("change", function (e) { state.sort = e.target.value; render(); });
+  document.getElementById("reset").addEventListener("click", function () {
+    state = { occ: "all", type: "All", who: "All", sort: "featured" };
+    document.getElementById("sort").value = "featured"; render();
+  });
+  render();
+</script>
+</body>
+</html>
